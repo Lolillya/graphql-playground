@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using graphql_playground.DTOs;
+using graphql_playground.GraphQL.Filters;
 using graphql_playground.Models;
 using graphql_playground.Services;
 using graphql_playground.Services.Courses;
@@ -34,6 +35,7 @@ namespace graphql_playground.GraphQL.Queries
         }
 
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 1)]
+        [UseFiltering(typeof(CourseFilterType))]
         public IQueryable<CourseType> GetPaginatedCourses([Service] SchoolDbContext context)
         {
             return context.Courses.Select(c => new CourseType()

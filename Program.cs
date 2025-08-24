@@ -19,6 +19,7 @@ builder.Services
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
+    .AddFiltering()
     .AddInMemorySubscriptions();
 
 var connectionString = configuration.GetConnectionString("Default");
