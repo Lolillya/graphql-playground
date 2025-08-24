@@ -1,0 +1,16 @@
+services:
+  schooldb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: schooldb
+    environment:
+      SA_PASSWORD: "Drop 2 hard"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - schooldb:/var/opt/mssql
+    restart: unless-stopped
+
+
+volumes: 
+  schooldb:
