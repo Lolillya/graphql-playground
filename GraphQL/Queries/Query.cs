@@ -37,8 +37,9 @@ namespace graphql_playground.GraphQL.Queries
         }
 
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 1)]
+        [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
-        [UseSorting]
+        [UseSorting(typeof(CourseSortType))]
         public IQueryable<CourseType> GetPaginatedCourses([Service] SchoolDbContext context)
         {
             return context.Courses.Select(c => new CourseType()

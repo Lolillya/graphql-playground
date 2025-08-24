@@ -21,6 +21,7 @@ builder.Services
     .AddSubscriptionType<Subscription>()
     .AddFiltering()
     .AddSorting()
+    .AddProjections()
     .AddInMemorySubscriptions();
 
 var connectionString = configuration.GetConnectionString("Default");

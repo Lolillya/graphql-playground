@@ -14,6 +14,7 @@ namespace graphql_playground.GraphQL.Queries
         public Guid Id { get; set; }
         public string Name { get; set; }                 // now nullable in schema
         public Subject Subject { get; set; }
+        [IsProjected(true)]
         public Guid InstructorId { get; set; }
         [GraphQLNonNullType]
         public async Task<InstructorType> Instructor([Service] InstructorDataLoader instructorDataLoader)
