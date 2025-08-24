@@ -20,6 +20,7 @@ builder.Services
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
     .AddFiltering()
+    .AddSorting()
     .AddInMemorySubscriptions();
 
 var connectionString = configuration.GetConnectionString("Default");
