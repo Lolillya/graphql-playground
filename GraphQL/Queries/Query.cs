@@ -10,6 +10,7 @@ using graphql_playground.Models;
 using graphql_playground.Services;
 using graphql_playground.Services.Courses;
 using HotChocolate;
+using HotChocolate.Authorization;
 using HotChocolate.Data;
 
 namespace graphql_playground.GraphQL.Queries
@@ -23,6 +24,7 @@ namespace graphql_playground.GraphQL.Queries
             _coursesRepository = coursesRepository;
         }
 
+        [Authorize]
         [UseSorting(typeof(CourseSortType))]
         public async Task<IEnumerable<CourseType>> GetCourses()
         {
@@ -36,6 +38,7 @@ namespace graphql_playground.GraphQL.Queries
             });
         }
 
+        [Authorize]
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 1)]
         [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
@@ -51,6 +54,7 @@ namespace graphql_playground.GraphQL.Queries
             });
         }
 
+        [Authorize]
         public async Task<CourseType> GetCourseByIdAsync(Guid id)
         {
             CourseDTO courseDTO = await _coursesRepository.GetById(id);

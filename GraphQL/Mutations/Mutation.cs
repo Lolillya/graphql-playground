@@ -8,6 +8,9 @@ using HotChocolate.Subscriptions;
 using HotChocolate.Execution;
 using graphql_playground.Services.Courses;
 using graphql_playground.DTOs;
+using HotChocolate.Authorization;
+using System.Security.Claims;
+using FirebaseAdminAuthentication.DependencyInjection.Models;
 
 namespace graphql_playground.GraphQL.Mutations
 {
@@ -20,8 +23,17 @@ namespace graphql_playground.GraphQL.Mutations
             _coursesRepository = coursesRepository;
         }
 
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInput, [Service] ITopicEventSender topicEventSender)
+        [Authorize]
+        public async Task<CourseResult> CreateCourse(CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+            string? userEmail = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
+            string? userName = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
+            string? verified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
+
+
+
+
             CourseDTO courseDTO = new CourseDTO()
             {
                 Name = courseInput.Name,
@@ -45,6 +57,7 @@ namespace graphql_playground.GraphQL.Mutations
 
         }
 
+        [Authorize]
         public async Task<CourseResult> UpdateCourse(Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender)
         {
             CourseDTO courseDTO = new CourseDTO()
@@ -72,6 +85,7 @@ namespace graphql_playground.GraphQL.Mutations
             return course;
         }
 
+        [Authorize(Policy = "IsAdmin")]
         public async Task<bool> DeleteCourse(Guid id)
         {
             try

@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 using graphql_playground.DataLoaders;
 using graphql_playground.GraphQL.Mutations;
 using graphql_playground.GraphQL.Queries;
@@ -8,7 +10,7 @@ using graphql_playground.Services.Instructors;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration =  builder.Configuration;
+var configuration = builder.Configuration;
 
 // Services
 builder.Services.AddControllers();
@@ -22,7 +24,11 @@ builder.Services
     .AddFiltering()
     .AddSorting()
     .AddProjections()
-    .AddInMemorySubscriptions();
+    .AddInMemorySubscriptions()
+    .AddAuthorization(o => o.AddPolicy("IsAdmin", p => p.RequireClaim("email", "someonesusernam@gmail.com")));
+
+builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddFirebaseAuthentication();
 
 var connectionString = configuration.GetConnectionString("Default");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlServer(connectionString));
@@ -45,9 +51,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseRouting();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.UseWebSockets();
 
