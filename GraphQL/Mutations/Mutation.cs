@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using graphql_playground.GraphQL.Queries;
 using graphql_playground.GraphQL.Subscriptions;
 using HotChocolate.Subscriptions;
-using HotChocolate.Execution;
 using graphql_playground.Services.Courses;
 using graphql_playground.DTOs;
 using HotChocolate.Authorization;
@@ -27,18 +21,13 @@ namespace graphql_playground.GraphQL.Mutations
         public async Task<CourseResult> CreateCourse(CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
             string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
-            string? userEmail = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
-            string? userName = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
-            string? verified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
-
-
-
 
             CourseDTO courseDTO = new CourseDTO()
             {
                 Name = courseInput.Name,
                 Subject = courseInput.Subject,
-                InstructorId = courseInput.InstructorId
+                InstructorId = courseInput.InstructorId,
+                CreatorId = userId
             };
 
             courseDTO = await _coursesRepository.Create(courseDTO);
@@ -58,15 +47,26 @@ namespace graphql_playground.GraphQL.Mutations
         }
 
         [Authorize]
-        public async Task<CourseResult> UpdateCourse(Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender)
+        public async Task<CourseResult> UpdateCourse(Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
-            CourseDTO courseDTO = new CourseDTO()
+            string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+
+            CourseDTO courseDTO = await _coursesRepository.GetById(id);
+
+            if (courseDTO == null)
             {
-                Id = id,
-                Name = courseInput.Name,
-                Subject = courseInput.Subject,
-                InstructorId = courseInput.InstructorId
-            };
+                throw new GraphQLException(new Error("Course not found", "COURSE_NOT_FOUND"));
+            }
+
+            if (courseDTO.CreatorId != userId)
+            {
+                throw new GraphQLException(new Error("You do not have permission to update this course", "INVALID_PERMISSON"));
+            }
+
+            courseDTO.Id = id;
+            courseDTO.Name = courseInput.Name;
+            courseDTO.Subject = courseInput.Subject;
+            courseDTO.InstructorId = courseInput.InstructorId;
 
             courseDTO = await _coursesRepository.Update(courseDTO);
 
