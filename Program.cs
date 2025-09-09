@@ -23,6 +23,7 @@ builder.Services
     .AddSubscriptionType<Subscription>()
     .AddType<CourseType>()
     .AddType<InstructorType>()
+    .AddTypeExtension<CourseQuery>()
     .AddFiltering()
     .AddSorting()
     .AddProjections()
