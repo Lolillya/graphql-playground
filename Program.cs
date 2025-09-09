@@ -21,6 +21,8 @@ builder.Services
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
+    .AddType<CourseType>()
+    .AddType<InstructorType>()
     .AddFiltering()
     .AddSorting()
     .AddProjections()

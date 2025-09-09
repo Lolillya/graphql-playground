@@ -1,11 +1,10 @@
-using FirebaseAdmin.Auth;
 using graphql_playground.DataLoaders;
 using graphql_playground.DTOs;
 using graphql_playground.Models;
 
 namespace graphql_playground.GraphQL.Queries
 {
-    public class CourseType
+    public class CourseType : ISearchResultType
     {
         public Guid Id { get; set; }
         public string Name { get; set; }                 // now nullable in schema

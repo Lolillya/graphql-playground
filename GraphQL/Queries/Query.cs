@@ -4,6 +4,7 @@ using graphql_playground.GraphQL.Sorters;
 using graphql_playground.Services;
 using graphql_playground.Services.Courses;
 using HotChocolate.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace graphql_playground.GraphQL.Queries
 {
@@ -46,6 +47,35 @@ namespace graphql_playground.GraphQL.Queries
                 InstructorId = courseDTO.InstructorId,
                 CreatorId = courseDTO.CreatorId
             };
+        }
+
+
+        // [UseDbContext(typeof(SchoolDbContext))]
+        public async Task<IEnumerable<ISearchResultType>> Search(string term, [Service] SchoolDbContext schoolDbContext)
+        {
+            IEnumerable<CourseType> courses = await schoolDbContext.Courses.Where(c => c.Name.Contains(term)).Select(c => new CourseType()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Subject = c.Subject,
+                InstructorId = c.InstructorId,
+                CreatorId = c.CreatorId
+            }).ToListAsync();
+
+            IEnumerable<InstructorType> instructors = await schoolDbContext.Instructors
+            .Where(i => i.FirstName.Contains(term) || i.LastName.Contains(term))
+            .Select(i => new InstructorType()
+            {
+                Id = i.Id,
+                FirstName = i.FirstName,
+                LastName = i.LastName,
+                Salary = i.Salary
+
+            }).ToListAsync();
+
+            return new List<ISearchResultType>()
+            .Concat(courses)
+            .Concat(instructors);
         }
 
         [GraphQLDeprecated("query deprecated")]
