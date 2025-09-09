@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FirebaseAdmin.Auth;
 using graphql_playground.DataLoaders;
 using graphql_playground.DTOs;
 using graphql_playground.Models;
-using graphql_playground.Services.Instructors;
 
 namespace graphql_playground.GraphQL.Queries
 {
@@ -32,6 +28,19 @@ namespace graphql_playground.GraphQL.Queries
         }
         public IEnumerable<StudentType>? Students { get; set; }
 
+        [IsProjected(true)]
+        public string CreatorId { get; set; }
+
+        public async Task<UserType> Creator([Service] UserDataLoader userDataLoader)
+        {
+
+            if (CreatorId == null)
+            {
+                return null;
+            }
+
+            return await userDataLoader.LoadAsync(CreatorId, CancellationToken.None);
+        }
 
     }
 }

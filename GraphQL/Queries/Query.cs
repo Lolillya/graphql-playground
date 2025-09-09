@@ -1,17 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Bogus;
 using graphql_playground.DTOs;
 using graphql_playground.GraphQL.Filters;
 using graphql_playground.GraphQL.Sorters;
-using graphql_playground.Models;
 using graphql_playground.Services;
 using graphql_playground.Services.Courses;
-using HotChocolate;
 using HotChocolate.Authorization;
-using HotChocolate.Data;
 
 namespace graphql_playground.GraphQL.Queries
 {
@@ -25,32 +17,19 @@ namespace graphql_playground.GraphQL.Queries
         }
 
         [Authorize]
-        [UseSorting(typeof(CourseSortType))]
-        public async Task<IEnumerable<CourseType>> GetCourses()
-        {
-            IEnumerable<CourseDTO> courseDTOs = await _coursesRepository.GetAll();
-            return courseDTOs.Select(c => new CourseType()
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Subject = c.Subject,
-                InstructorId = c.InstructorId
-            });
-        }
-
-        [Authorize]
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 1)]
         [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
         [UseSorting(typeof(CourseSortType))]
-        public IQueryable<CourseType> GetPaginatedCourses([Service] SchoolDbContext context)
+        public IQueryable<CourseType> GetCourses([Service] SchoolDbContext context)
         {
             return context.Courses.Select(c => new CourseType()
             {
                 Id = c.Id,
                 Name = c.Name,
                 Subject = c.Subject,
-                InstructorId = c.InstructorId
+                InstructorId = c.InstructorId,
+                CreatorId = c.CreatorId
             });
         }
 
@@ -64,7 +43,8 @@ namespace graphql_playground.GraphQL.Queries
                 Id = courseDTO.Id,
                 Name = courseDTO.Name,
                 Subject = courseDTO.Subject,
-                InstructorId = courseDTO.InstructorId
+                InstructorId = courseDTO.InstructorId,
+                CreatorId = courseDTO.CreatorId
             };
         }
 

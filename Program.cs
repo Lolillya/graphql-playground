@@ -37,6 +37,7 @@ builder.Services.AddDbContextPool<SchoolDbContext>(o => o.UseSqlServer(connectio
 builder.Services.AddScoped<CoursesRepository>();
 builder.Services.AddScoped<InstructorsRepository>();
 builder.Services.AddScoped<InstructorDataLoader>();
+builder.Services.AddScoped<UserDataLoader>();
 
 builder.Services.AddCors(options =>
 {
