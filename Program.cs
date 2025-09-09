@@ -7,13 +7,19 @@ using graphql_playground.GraphQL.Subscriptions;
 using graphql_playground.Services;
 using graphql_playground.Services.Courses;
 using graphql_playground.Services.Instructors;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using graphql_playground.Validators;
+using FluentValidation;
+using AppAny.HotChocolate.FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 // Services
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CourseTypeInputValidator>();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services
@@ -27,6 +33,11 @@ builder.Services
     .AddFiltering()
     .AddSorting()
     .AddProjections()
+    .AddAuthorization()
+    .AddFluentValidation(o =>
+    {
+        o.UseDefaultErrorMapper();
+    })
     .AddInMemorySubscriptions()
     .AddAuthorization(o => o.AddPolicy("IsAdmin", p => p.RequireClaim("email", "someonesusernam@gmail.com")));
 

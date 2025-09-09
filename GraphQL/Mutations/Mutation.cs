@@ -5,6 +5,9 @@ using graphql_playground.DTOs;
 using HotChocolate.Authorization;
 using System.Security.Claims;
 using FirebaseAdminAuthentication.DependencyInjection.Models;
+using graphql_playground.Validators;
+using System.ComponentModel.DataAnnotations;
+using AppAny.HotChocolate.FluentValidation;
 
 namespace graphql_playground.GraphQL.Mutations
 {
@@ -15,11 +18,14 @@ namespace graphql_playground.GraphQL.Mutations
         public Mutation(CoursesRepository coursesRepository)
         {
             _coursesRepository = coursesRepository;
+            
         }
 
-        [Authorize]
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        // [Authorize]
+        public async Task<CourseResult> CreateCourse([UseFluentValidation, UseValidator<CourseTypeInputValidator>] CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            
+
             string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
 
             CourseDTO courseDTO = new CourseDTO()
@@ -47,8 +53,10 @@ namespace graphql_playground.GraphQL.Mutations
         }
 
         [Authorize]
-        public async Task<CourseResult> UpdateCourse(Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        public async Task<CourseResult> UpdateCourse([UseFluentValidation, UseValidator<CourseTypeInputValidator>] Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
         {
+            
+            
             string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
 
             CourseDTO courseDTO = await _coursesRepository.GetById(id);
