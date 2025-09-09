@@ -8,6 +8,8 @@ using FirebaseAdminAuthentication.DependencyInjection.Models;
 using graphql_playground.Validators;
 using System.ComponentModel.DataAnnotations;
 using AppAny.HotChocolate.FluentValidation;
+using graphql_playground.Middlewares.UseUser;
+using graphql_playground.Models;
 
 namespace graphql_playground.GraphQL.Mutations
 {
@@ -21,12 +23,12 @@ namespace graphql_playground.GraphQL.Mutations
             
         }
 
-        // [Authorize]
-        public async Task<CourseResult> CreateCourse([UseFluentValidation, UseValidator<CourseTypeInputValidator>] CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        [Authorize]
+        [UseUser]
+        public async Task<CourseResult> CreateCourse([UseFluentValidation, UseValidator<CourseTypeInputValidator>] CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, [User] User user)
         {
-            
 
-            string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+            string userId = user.Id;
 
             CourseDTO courseDTO = new CourseDTO()
             {
@@ -53,11 +55,10 @@ namespace graphql_playground.GraphQL.Mutations
         }
 
         [Authorize]
-        public async Task<CourseResult> UpdateCourse([UseFluentValidation, UseValidator<CourseTypeInputValidator>] Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, ClaimsPrincipal claimsPrincipal)
+        [UseUser]
+        public async Task<CourseResult> UpdateCourse(Guid id, [UseFluentValidation, UseValidator<CourseTypeInputValidator>] CourseInputType courseInput, [Service] ITopicEventSender topicEventSender, [User] User user)
         {
-            
-            
-            string? userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
+            string? userId = user.Id;
 
             CourseDTO courseDTO = await _coursesRepository.GetById(id);
 
@@ -92,6 +93,8 @@ namespace graphql_playground.GraphQL.Mutations
 
             return course;
         }
+
+
 
         [Authorize(Policy = "IsAdmin")]
         public async Task<bool> DeleteCourse(Guid id)
