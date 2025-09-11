@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using graphql_playground.Validators;
 using FluentValidation;
 using AppAny.HotChocolate.FluentValidation;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -41,7 +42,10 @@ builder.Services
     .AddInMemorySubscriptions()
     .AddAuthorization(o => o.AddPolicy("IsAdmin", p => p.RequireClaim("email", "someonesusernam@gmail.com")));
 
-builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(configuration.GetValue<string>("FIREBASE_AUTH_PATH"))
+}));
 builder.Services.AddFirebaseAuthentication();
 
 var connectionString = configuration.GetConnectionString("Default");
