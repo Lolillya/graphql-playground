@@ -12,8 +12,8 @@ using graphql_playground.Services;
 namespace graphql_playground.Migrations
 {
     [DbContext(typeof(SchoolDbContext))]
-    [Migration("20250908162637_CourseCreator")]
-    partial class CourseCreator
+    [Migration("20250911163720_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -13,6 +13,7 @@ using graphql_playground.Validators;
 using FluentValidation;
 using AppAny.HotChocolate.FluentValidation;
 using Google.Apis.Auth.OAuth2;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -42,13 +43,32 @@ builder.Services
     .AddInMemorySubscriptions()
     .AddAuthorization(o => o.AddPolicy("IsAdmin", p => p.RequireClaim("email", "someonesusernam@gmail.com")));
 
-builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
+var firebaseCredPath = configuration.GetValue<string>("FIREBASE_AUTH_PATH")
+    ?? Environment.GetEnvironmentVariable("FIREBASE_AUTH_PATH");
+if (!string.IsNullOrWhiteSpace(firebaseCredPath) && File.Exists(firebaseCredPath))
 {
-    Credential = GoogleCredential.FromFile(configuration.GetValue<string>("FIREBASE_AUTH_PATH"))
-}));
-builder.Services.AddFirebaseAuthentication();
+    builder.Services.AddSingleton(FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile(firebaseCredPath)
+    }));
+    builder.Services.AddFirebaseAuthentication();
+}
+else
+{
+    builder.Logging.AddConsole();
+    builder.Logging.AddDebug();
+    builder.Services.AddLogging();
+    builder.Services.AddSingleton<FirebaseApp?>(sp => null);
+    builder.Services.AddAuthentication();
+    builder.Services.AddAuthorization();
+    builder.Services.BuildServiceProvider()
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger("graphql-playground")
+        .LogWarning("FIREBASE_AUTH_PATH not set or file missing; skipping Firebase initialization.");
+}
 
-var connectionString = configuration.GetConnectionString("Default");
+var connectionString = configuration.GetConnectionString("Default")
+    ?? configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlServer(connectionString));
 
 builder.Services.AddDbContextPool<SchoolDbContext>(o => o.UseSqlServer(connectionString));
